@@ -1,0 +1,12 @@
+/* Keep owner information on the left and the pet list on the right. */
+.profile-dashboard > .animals-card {
+  grid-column: 2;
+  grid-row: 1;
+}
+
+@media (max-width: 900px) {
+  .profile-dashboard > .animals-card {
+    grid-column: 1;
+    grid-row: auto;
+  }
+}

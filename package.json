@@ -1,0 +1,12 @@
+{
+  "name": "animal-ua",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Animal.ua static site and Supabase-backed API",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}
