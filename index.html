@@ -1,534 +1,84 @@
 <!DOCTYPE html>
 <html lang="uk">
-
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Animal.ua</title>
-
-    <link rel="icon" href="img/Animal.ua.png">
-    <link rel="stylesheet" href="css/main.min.css">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@8/swiper-bundle.min.css" />
-    <script src="https://cdn.jsdelivr.net/npm/swiper@8/swiper-bundle.min.js"></script>
-
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Animal.ua — онлайн-сервіс для реєстрації, обліку та турботи про домашніх тварин.">
+  <title>Animal.ua — турбота про тварину в одному сервісі</title>
+  <link rel="icon" href="img/Animal.ua.png">
+  <link rel="stylesheet" href="css/main.min.css?v=3">
+  <link rel="stylesheet" href="css/ref-overrides.css?v=11">
+  <link rel="stylesheet" href="css/testimonial-overrides.css?v=2">
 </head>
-<header>
-    <nav class="head">
-        <div class="logo"><img src="img/Animal.png" alt="logo"></div>
-        <div class="menu">
-            <ul class="navbar-menu">
-                <input type="checkbox" id="checkbox-toggle" />
-                <label for="checkbox-toggle" class="hamburger"><span class="hamburger-line"></span></label>
-                <div class="menu-items">
-                    <li>
-                        <a class="menu-button" href="index.html">Головна</a>
-                    </li>
-                    <li>
-                        <a class="menu-button" href="#services">Послуги</a>
-                    </li>
-                    <li>
-                        <a class="menu-button" href="#about">Про нас</a>
-                    </li>
-                    <li>
-                        <a class="menu-button" href="#feedback">Відгуки</a>
-                    </li>
-                    <li>
-                        <a class="menu-button" href="#contacts">Контакти</a>
-                    </li>
-                </div>
-            </ul>
-        </div>
-    </nav>
-</header>
-
 <body>
-    <section class="banner">
-        <div class="promo-title">
-            <h1>Ефективний та <span class="special-word">надійний</span> онлайн-портал для обліку <span
-                    class="special-word">домашніх</span> тварин</h1>
-        </div>
-        <div class="hero">
-            <div class="banner-text">
-                <p class="promo-text">Професійне програмне забезпечення, яке надає можливість реєстрації та обліку
-                    домашніх
-                    тварин.</p>
-            </div>
-        </div>
-
+  <header class="site-header" id="top">
+    <div class="container nav-wrap">
+      <a class="brand" href="#top" aria-label="Animal.ua — на головну"><img src="img/Animal.png" alt="Animal.ua"></a>
+      <button class="menu-toggle" type="button" aria-expanded="false" aria-controls="main-menu">Меню</button>
+      <nav class="main-nav" id="main-menu" aria-label="Основна навігація">
+        <a class="is-current" href="#top">Головна</a><a href="#features">Можливості</a><a href="#vets">Для ветклінік</a><a href="#about">Про нас</a><a href="#contacts">Контакти</a>
+      </nav>
+      <div class="nav-actions"><a class="button button-ghost" href="#chip-search">Знайти за чипом</a><a class="button button-primary account-entry" id="account-entry" href="account.html">Увійти в акаунт</a></div>
+    </div>
+  </header>
+  <main>
+    <section class="hero section-space">
+      <div class="container hero-grid">
+        <div class="hero-copy"><p class="eyebrow">Єдина система обліку тварин</p><h1>Турбота про тварину — <span>в одному надійному сервісі</span></h1><p class="lead">Реєструйте домашніх тварин, зберігайте історію здоров’я та швидко знаходьте їх за номером чипа.</p><div class="hero-actions"><a class="button button-primary button-large" id="register-pet-link" href="account.html">Зареєструвати тварину</a><a class="button button-outline button-large" href="#chip-search">Знайти за чипом</a></div><p class="hero-note">Безпечно, зручно та доступно для власників і ветеринарних установ.</p></div>
+        <div class="hero-visual" aria-label="Власник працює з Animal.ua разом із домашнім улюбленцем"><img src="img/banner.png" alt="Власник із котом працює в Animal.ua"><div class="mini-card pet-card"><img src="img/pets.png" alt=""><span>Профіль тварини</span><strong>Уся історія поруч</strong></div><div class="mini-card status-card"><img src="img/checkmark-circle.png" alt=""><span>Дані захищено</span><strong>Ваші записи в порядку</strong></div></div>
+      </div>
     </section>
-    <section class="services" id="services">
-        <div class="max-width">
-            <h2 class="title">Наша програма надає велику кількість <span class="word">корисних</span> та <span
-                    class="word">зручних</span> для Вас послуг</h2>
-            <div class="serv-content">
-                <div class="card">
-                    <div class="box">
-                        <img class="img-block" src="img/Layer_3.png" alt="">
-                        <h3 class="cards-text">Власникам​</h3>
-                    </div>
-                </div>
-                <div class="card">
-                    <div class="box">
-                        <img class="img-block" src="img/Layer_4.png" alt="">
-                        <h3 class="cards-text">Ветеринарнам установам​</h3>
-                    </div>
-                </div>
-                <div class="card">
-                    <div class="box">
-                        <img class="img-block" src="img/Layer_5.png" alt="">
-                        <h3 class="cards-text">Розведення тварин</h3><br>
-                    </div>
-                </div>
-                <div class="card">
-                    <div class="box">
-                        <img class="img-block" src="img/Layer_6.png" alt="">
-                        <h3 class="cards-text">Пошук та облік чипів​</h3><br>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-    <section class="swiper-section" id="swiper">
-        <div class="swiper-pic">
-            <h2 class="swiper-title">Ветеринарним <br> <span class="word">установам</span></h2>
-            <div class="swiper mySwiper">
-                <div class="swiper-wrapper">
-                    <div class="swiper-slide">
-                        <div class="swiper-block">
-                            <div class="swiper-img"><img src="img/calendar.png" alt=""></div>
-                            <div class="swiper-text">
-                                <h3>Календар подій</h3>
-                                <p>Можливість вести зручний облік у журналі</p>
-                            </div>
-                        </div>
-                        <div class="swiper-block">
-                            <div class="swiper-img"><img src="img/docs.png" alt=""></div>
-                            <div class="swiper-text">
-                                <h3>Оформлення документів</h3>
-                                <p>Видача паспортів та інших документів для тварин</p>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="swiper-slide">
-                        <div class="swiper-block">
-                            <div class="swiper-img"><img src="img/register.png" alt=""></div>
-                            <div class="swiper-text">
-                                <h3>Самостійна реєстрація</h3>
-                                <p>Реєструйте себе, Вашу тварину та установи в IC Animal.ua</p>
-                            </div>
-                        </div>
-                        <div class="swiper-block">
-                            <div class="swiper-img"><img src="img/consult.png" alt=""></div>
-                            <div class="swiper-text">
-                                <h3>Запис тварини на консультацію</h3>
-                                <p>Повне обстеження з автоматизованим записом даних</p>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="swiper-slide">
-                        <div class="swiper-block">
-                            <div class="swiper-img"><img src="img/pets.png" alt=""></div>
-                            <div class="swiper-text">
-                                <h3>Бродячі тварини</h3>
-                                <p>Записуйте та керуйте інформацією про знайдених бездомних тварин</p>
-                            </div>
-                        </div>
-                        <div class="swiper-block">
-                            <div class="swiper-img"><img src="img/list.png" alt=""></div>
-                            <div class="swiper-text">
-                                <h3>Облік товарів та послуг</h3>
-                                <p>Ведення Статистичної інформації про отримані або надані товари</p>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="swiper-slide">
-                        <div class="swiper-block">
-                            <div class="swiper-img"><img src="img/advertisement.png" alt=""></div>
-                            <div class="swiper-text">
-                                <h3>Реклама</h3>
-                                <p>Можливість рекламування послуг та продукції серед користувачів IC</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="swiper-button-next"></div>
-                <div class="swiper-button-prev"></div>
-            </div>
-        </div>
-    </section>
-    <section>
-        <h2 class="owner-title">Власникам</h2>
-        <div class="owner">
-            <div class="owner-picture">
-                <img src="img/Layer_7.png" alt="">
-            </div>
-            <div class="owner-list">
-                <div class="owner-block">
-                    <div class="owner-img"><img src="img/note-edit.png" alt=""></div>
-                    <div class="owner-text">
-                        <h3>Реєстрація подій</h3>
-                        <p>Звернення до ветеринарного лікаря, дослідження, вакцинація та інше.</p>
-                    </div>
-                </div>
-                <div class="owner-block">
-                    <div class="owner-img"><img src="img/calendar-03.png" alt=""></div>
-                    <div class="owner-text">
-                        <h3>Календар</h3>
-                        <p>Планування та нагадування подій</p>
-                    </div>
-                </div>
-                <div class="owner-block">
-                    <div class="owner-img"><img src="img/user-edit-01.png" alt=""></div>
-                    <div class="owner-text">
-                        <h3>Реєстрація</h3>
-                        <p>Реєструйте себе та тварину в IC Animal.ua</p>
-                    </div>
-                </div>
-                <div class="owner-block">
-                    <div class="owner-img"><img src="img/package-search.png" alt=""></div>
-                    <div class="owner-text">
-                        <h3>Пошук товарів та послуг</h3>
-                        <p>Пошук товарів з можливістю онлайн замовлення</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-    <section>
-        <h2 class="breeding-title">Розведення <br><span class="word">тварин</span></h2>
-        <div class="breeding">
-            <div class="breeding-picture">
-
-            </div>
-            <div class="breeding-list">
-                <div class="breeding-block">
-                    <div class="breeding-img"><img src="img/calendar-02.png" alt=""></div>
-                    <div class="breeding-text">
-                        <h3>Планування</h3>
-                        <p>Користуйтесь зручним віртуальним календарем подій з нагадуванням</p>
-                    </div>
-                </div>
-                <div class="breeding-block">
-                    <div class="breeding-img"><img src="img/heart.png" alt=""></div>
-                    <div class="breeding-text">
-                        <h3>В’язка</h3>
-                        <p>Пошук тварин за критеріями з метою розведення</p>
-                    </div>
-                </div>
-                <div class="breeding-block">
-                    <div class="breeding-img"><img src="img/user-account.png" alt=""></div>
-                    <div class="breeding-text">
-                        <h3>Реєстрація</h3>
-                        <p>Самостійна реєстрація власника та тварини</p>
-                    </div>
-                </div>
-                <div class="breeding-block">
-                    <div class="breeding-img"><img src="img/search.png" alt=""></div>
-                    <div class="breeding-text">
-                        <h3>Відстеження подій</h3>
-                        <p>Реєстрація для обстеження, вакцинації, обробки тварини та звернення до спеціаліста</p>
-                    </div>
-                </div>
-                <div class="breeding-block">
-                    <div class="breeding-img"><img src="img/megaphone-02.png" alt=""></div>
-                    <div class="breeding-text">
-                        <h3>Реклама</h3>
-                        <p>Розміщення оголошення про власну тварину</p>
-                    </div>
-                </div>
-                <div class="breeding-block-img">
-                    <img src="img/breeding-img.png" alt="">
-                </div>
-            </div>
-    </section>
-    <section>
-        <h2 class="search-title"><span class="word">Пошук</span> та <span class="word">облік</span> чипів</h2>
-        <p class="search-paragraph">Шукайте Ваших тварин швидко та з абсолютною точністю</p>
-        <div class="search">
-            <div class="search-list">
-                <div class="search-block">
-                    <div class="search-img"><img src="img/search-focus.png" alt=""></div>
-                    <div class="search-text">
-                        <h3>Шляхом парсінгу даних по іншим сайтам у відкритих базах</h3>
-                    </div>
-                </div>
-                <div class="search-block">
-                    <div class="search-img"><img src="img/ticket-03.png" alt=""></div>
-                    <div class="search-text">
-                        <h3>За номером чіпу</h3>
-                    </div>
-                </div>
-                <div class="search-block">
-                    <div class="search-img"><img src="img/telegram.png" alt=""></div>
-                    <div class="search-text">
-                        <h3>За допомогою Телеграм бота</h3>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="map">
-            <img class="map-img" src="img/map.png" alt="">
-        </div>
-
-    </section>
-    <section>
-        <h2 class="accounting-title">Облік</h2>
-        <div class="accounting">
-            <div class="accounting-list">
-                <div class="accounting-block">
-                    <div class="accounting-img"><img src="img/auto-conversations.png" alt=""></div>
-                    <div class="accounting-text">
-                        <h3>Облік</h3>
-                        <p>Система оцінювання основана на відгуках</p>
-                    </div>
-                </div>
-                <div class="accounting-block">
-                    <div class="accounting-img"><img src="img/edit-01.png" alt=""></div>
-                    <div class="accounting-text">
-                        <h3>Реєстрація подій</h3>
-                        <p>Надходження, продаж, переміщення та встановлення чіпу</p>
-                    </div>
-                </div>
-                <div class="accounting-block">
-                    <div class="accounting-img"><img src="img/note.png" alt=""></div>
-                    <div class="accounting-text">
-                        <h3>Звітність</h3>
-                        <p>Отримання інформації про чіп</p>
-                    </div>
-                </div>
-            </div>
-            <div class="accounting-picture">
-                <img src="img/accounting-img.png" alt="">
-                <h3 class="accounting-picture-text">Доєднуйся до нашої сторінки в Facebook та дізнайся про нас
-                    більше!</h3>
-                <a class="accounting-button" href="index.html">Перейти</a>
-            </div>
-        </div>
-    </section>
-    <section>
-        <h2 class="advantages-title">Які наші <span class="word">переваги?</span></h2>
-        <div class="advantages">
-            <div class="advantages-picture">
-                <img src="img/advantages-img.png" alt="">
-            </div>
-            <div class="advantages-list">
-                <div class="advantages-block">
-                    <div class="advantages-img"><img src="img/checkmark-circle.png" alt=""></div>
-                    <div class="advantages-text">
-                        <p>Ефективне ведення обліку та забезпечення збереження інформації про тварин</p>
-                    </div>
-                </div>
-                <div class="advantages-block">
-                    <div class="advantages-img"><img src="img/checkmark-circle.png" alt=""></div>
-                    <div class="advantages-text">
-                        <p>Гнучкий та налаштований підхід до потреб клієнтів</p>
-                    </div>
-                </div>
-                <div class="advantages-block">
-                    <div class="advantages-img"><img src="img/checkmark-circle.png" alt=""></div>
-                    <div class="advantages-text">
-                        <p>Відслідковування історії здоров’я та лікування тварин</p>
-                    </div>
-                </div>
-                <div class="advantages-block">
-                    <div class="advantages-img"><img src="img/checkmark-circle.png" alt=""></div>
-                    <div class="advantages-text">
-                        <p>Економія часу та зниження навантаження на персонал</p>
-                    </div>
-                </div>
-                <div class="advantages-block">
-                    <div class="advantages-img"><img src="img/checkmark-circle.png" alt=""></div>
-                    <div class="advantages-text">
-                        <p>Інтеграція з іншими програмними та технічними засобами</p>
-                    </div>
-                </div>
-                <div class="advantages-block">
-                    <div class="advantages-img"><img src="img/checkmark-circle.png" alt=""></div>
-                    <div class="advantages-text">
-                        <p>Забезпечення точності та достовірності даних завдяки автоматизації обліку</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-    <section class="questions">
-        <div class="have-questions">
-            <h3>ВИНИКЛИ ПИТАННЯ?</h3>
-            <p>Ми швидко опрацюємо Ваше питання та надамо детальний фідбек!</p>
-            <a class="have-questions-btn" href="index.html">Перейти</a>
-        </div>
-        </div>
-    </section>
-    <section id="feedback">
-        <h2 class="feedback-title">Що <span class="word">кажуть</span> наші <span class="word">клієнти</span>: </h2>
-        <div class="swiper mySwiper">
-            <div class="swiper-wrapper">
-                <div class="swiper-slide">
-                    <div class="feedback-block">
-                        <div class="feedback-img"><img src="img/stars.png" alt=""></div>
-                        <div class="swiper-text">
-                            <h3>Spen dekajälig. Köng säpojogg. Odek prer. Rer trinör. Epijytögt multir. Rel dotada.
-                                Spelig antining. Funkis stadsspret.
-                                Rent ner. Orade kang. Kan carpa. Pes tidade. Kan stenoremid. Monortad. Opunde
-                                kvasigt.</h3>
-                            <p>Stepan Sichko</p>
-                        </div>
-                    </div>
-                </div>
-                <div class="swiper-slide">
-                    <div class="feedback-block">
-                        <div class="feedback-img"><img src="img/stars.png" alt=""></div>
-                        <div class="swiper-text">
-                            <h3>Spen dekajälig. Köng säpojogg. Odek prer. Rer trinör. Epijytögt multir. Rel dotada.
-                                Spelig antining. Funkis stadsspret.
-                                Rent ner. Orade kang. Kan carpa. Pes tidade. Kan stenoremid. Monortad. Opunde
-                                kvasigt.</h3>
-                            <p>Stepan Sichko</p>
-                        </div>
-                    </div>
-                </div>
-                <div class="swiper-slide">
-                    <div class="feedback-block">
-                        <div class="feedback-img"><img src="img/stars.png" alt=""></div>
-                        <div class="swiper-text">
-                            <h3>Spen dekajälig. Köng säpojogg. Odek prer. Rer trinör. Epijytögt multir. Rel dotada.
-                                Spelig antining. Funkis stadsspret.
-                                Rent ner. Orade kang. Kan carpa. Pes tidade. Kan stenoremid. Monortad. Opunde
-                                kvasigt.</h3>
-                            <p>Stepan Sichko</p>
-                        </div>
-                    </div>
-                </div>
-                <div class="swiper-slide">
-                    <div class="feedback-block">
-                        <div class="feedback-img"><img src="img/stars.png" alt=""></div>
-                        <div class="swiper-text">
-                            <h3>Spen dekajälig. Köng säpojogg. Odek prer. Rer trinör. Epijytögt multir. Rel dotada.
-                                Spelig antining. Funkis stadsspret.
-                                Rent ner. Orade kang. Kan carpa. Pes tidade. Kan stenoremid. Monortad. Opunde
-                                kvasigt.</h3>
-                            <p>Stepan Sichko</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="feedback-swiper">
-                <div class="swiper-button-next"></div>
-                <div class="swiper-button-prev"></div>
-            </div>
-        </div>
-    </section>
-    <section id="about">
-        <h2 class="about-title">Про <span class="word">нас</span> </h2>
-        <div class="about">
-            <div class="about-list">
-                <div class="about-block">
-                    <div class="about-text">
-                        <h3>IT-компанія</h3>
-                        <p>Ми є провідною ІТ-компанією, що спеціалізується на розробці програмного забезпечення.
-                            <br><br> Наша команда складається з
-                            висококваліфікованих фахівців з великим досвідом роботи в різних сферах IT.
-                        </p>
-                    </div>
-                </div>
-                <div class="about-picture">
-                    <img src="img/about.png" alt="">
-                </div>
-            </div>
-    </section>
-    <section class="about-us" id="Parceiros">
-        <div class="about-width">
-            <div class="about-content">
-                <div class="card">
-                    <div class="box">
-                        <img class="about-img" src="img/glasses.png" alt="">
-                        <div class="about-us-text">
-                            <h3>Кваліфікація</h3>
-                            <p>Ми маємо підтверджений досвід надання високоякісних програмних рішень клієнтам із різних
-                                галузей.</p>
-                        </div>
-                    </div>
-                </div>
-                <div class="card">
-                    <div class="box">
-                        <img class="about-img" src="img/alms.png" alt="">
-                        <div class="about-us-text">
-                            <h3>Послуги</h3>
-                            <p>Наші послуги включають розробку програмного забезпечення на замовлення, розробку
-                                мобільних додатків, веб-розробку, а
-                                також обслуговування та підтримку програмного забезпечення.</p>
-                        </div>
-                    </div>
-                </div>
-                <div class="card">
-                    <div class="box">
-                        <img class="about-img" src="img/analytics-01.png" alt="">
-                        <div class="about-us-text">
-                            <h3>Пріоритет</h3>
-                            <p>Ми надаємо пріоритет задоволенню клієнтів і тісно співпрацюємо з нашими клієнтами, щоб
-                                зрозуміти їхні унікальні
-                                бізнес-вимоги та надати індивідуальні програмні рішення.</p>
-                        </div>
-                    </div>
-                </div>
-                <div class="card">
-                    <div class="box">
-                        <img class="about-img" src="img/bounding-box.png" alt="">
-                        <div class="about-us-text">
-                            <h3>Технології</h3>
-                            <p>Ми використовуємо новітні технології та методології розробки для створення інноваційних
-                                та надійних програмних рішень.</p>
-                        </div>
-                    </div>
-                </div>
-                <div class="card">
-                    <div class="box">
-                        <img class="about-img" src="img/idea.png" alt="">
-                        <div class="about-us-text">
-                            <h3>Мета</h3>
-                            <p>Наша мета — допомогти компаніям підвищити ефективність, оптимізувати процеси та досягти
-                                цілей цифрової трансформації за
-                                допомогою технологій.</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-    <footer id="contacts">
-        <div class="footer">
-            <div class="contacts">
-                <div class="logo-footer"><img src="img/Animal-footer.png" alt="logo"></div>
-                <h3>Контакти</h3>
-                <a href="mailto:admin@vetcontrol.net" target="_blank">admin@vetcontrol.net</a>
-                <div class="social">
-                    <h3>Ми у соц. мережах</h3>
-                    <a class="media" href="#"><img src="img/icon _viber_.png" alt=""></a>
-                    <a class="media" href="#"><img src="img/icon _facebook_.png" alt=""></a>
-                    <a class="media" href="#"><img src="img/icon _twitter_.png" alt=""></a>
-                    <a class="media" href="#"><img src="img/icon _instagram_.png" alt=""></a>
-                </div>
-            </div>
-            <div class="info">
-                <h3>Animal.UA</h3>
-                <p>Онлайн облік тварин - швидко, просто та надійно</p>
-                <div class="copyright">
-                    <p>Copyright © 2023. All rights reserved</p>
-                </div>
-            </div>
-        </div>
-    </footer>
-    <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
-    <script>
-        var swiper = new Swiper(".mySwiper", {
-            spaceBetween: 30,
-            navigation: {
-                nextEl: ".swiper-button-next",
-                prevEl: ".swiper-button-prev",
-            },
-            keyboard: true,
-        });
-    </script>
+    <section class="stats-section" aria-label="Переваги сервісу"><div class="container stats-grid"><div class="stat"><img src="img/pets.png" alt=""><div><strong>50 000+</strong><span>зареєстрованих тварин</span></div></div><div class="stat"><img src="img/auto-conversations.png" alt=""><div><strong>320+</strong><span>ветеринарних установ</span></div></div><div class="stat"><img src="img/checkmark-circle.png" alt=""><div><strong>24/7</strong><span>доступ до даних</span></div></div></div></section>
+    <section class="section-space audience" id="features"><div class="container"><div class="section-heading"><p class="eyebrow">Один сервіс — різні сценарії</p><h2>Для кого <span>Animal.ua?</span></h2><p>Оберіть свій сценарій і отримайте потрібні інструменти без зайвого.</p></div><div class="audience-grid"><article class="audience-card owner-card"><div><h3>Власникам тварин</h3><p>Зберігайте важливу інформацію про улюбленця, плануйте події та будьте спокійні за його безпеку.</p><a href="#start">Дізнатися більше</a></div><img src="img/Layer_3.png" alt="Власниця обіймає кота"></article><article class="audience-card vet-card" id="vets"><div><h3>Ветеринарним установам</h3><p>Керуйте записами, створюйте документи та надавайте якісний сервіс клієнтам.</p><a href="#start">Дізнатися більше</a></div><img src="img/Layer_4.png" alt="Ветеринарка оглядає собаку"></article></div></div></section>
+    <section class="chip-section section-space" id="chip-search"><div class="container chip-card"><div class="chip-icon"><img src="img/search-focus.png" alt=""></div><div><h2>Перевірте номер чипа</h2><p>Дізнайтеся інформацію про тварину за 15-значним номером мікрочипа.</p></div><form class="chip-form" action="#chip-search"><label class="sr-only" for="chip-number">15-значний номер чипа</label><input id="chip-number" name="chip" inputmode="numeric" maxlength="15" placeholder="Введіть 15-значний номер" pattern="[0-9]{15}"><button class="button button-primary" type="submit">Знайти тварину</button><p class="form-message" aria-live="polite"></p></form></div></section>
+    <section class="how section-space"><div class="container"><div class="section-heading"><p class="eyebrow">Простий старт</p><h2>Як це <span>працює</span></h2></div><ol class="steps-grid"><li><span class="step-number">1</span><img src="img/user-account.png" alt=""><h3>Створіть профіль</h3><p>Зареєструйтеся та заповніть коротку інформацію про себе.</p></li><li><span class="step-number">2</span><img src="img/pets.png" alt=""><h3>Додайте тварину</h3><p>Внесіть дані улюбленця та, за потреби, номер його мікрочипа.</p></li><li><span class="step-number">3</span><img src="img/checkmark-circle.png" alt=""><h3>Керуйте даними</h3><p>Зберігайте документи, стежте за подіями та історією здоров’я.</p></li></ol></div></section>
+    <section class="services section-space" id="services"><div class="container"><div class="section-heading"><p class="eyebrow">Усе в одному місці</p><h2>Все необхідне для <span>турботи про тварину</span></h2></div><div class="services-grid"><article><img src="img/note-edit.png" alt=""><h3>Профіль тварини</h3><p>Дані, документи та фото у власному кабінеті.</p></article><article><img src="img/calendar-03.png" alt=""><h3>Історія здоров’я</h3><p>Вакцинації, візити та рекомендації під контролем.</p></article><article><img src="img/auto-conversations.png" alt=""><h3>Нагадування</h3><p>Не пропускайте важливі події та щеплення.</p></article><article><img src="img/search.png" alt=""><h3>Пошук за чипом</h3><p>Швидко знаходьте тварину у відкритих даних.</p></article><article><img src="img/analytics-01.png" alt=""><h3>Звіти та аналітика</h3><p>Зручна статистика для власників і клінік.</p></article></div></div></section>
+    <section class="testimonials section-space" id="about"><div class="container"><div class="section-heading"><p class="eyebrow">Реальні історії</p><h2>Що кажуть <span>наші користувачі</span></h2></div><div class="testimonials-grid"><blockquote><div class="quote-mark" aria-hidden="true">“</div><p>Animal.ua допоміг мені знайти нашого кота за номером чипа. Сервіс простий, а підтримка — найкраща!</p><div class="testimonial-meta"><img src="img/stars.png" alt="5 з 5"><div><strong>Олена К.</strong><span>власниця кота</span></div><img class="testimonial-avatar" src="img/Animal.png" alt=""></div></blockquote><blockquote><div class="quote-mark" aria-hidden="true">“</div><p>Зручний інструмент для клініки. Економимо час і надаємо клієнтам якісний сервіс.</p><div class="testimonial-meta"><img src="img/stars.png" alt="5 з 5"><div><strong>Ігор М.</strong><span>керівник ветклініки</span></div><img class="testimonial-avatar" src="img/Animal.png" alt=""></div></blockquote><blockquote><div class="quote-mark" aria-hidden="true">“</div><p>Все про мого улюбленця в одному місці. Нагадування довго виручають!</p><div class="testimonial-meta"><img src="img/stars.png" alt="5 з 5"><div><strong>Марія П.</strong><span>власниця собаки</span></div><img class="testimonial-avatar" src="img/Animal.png" alt=""></div></blockquote></div></div></section>
+    <section class="trust-section" aria-labelledby="trust-title"><div class="container"><div class="section-heading"><p class="eyebrow">Партнери та спільнота</p><h2 id="trust-title">Нам <span>довіряють</span></h2></div><div class="trust-logos"><img src="extracted_logos/royal-canin.png" alt="Royal Canin"><img src="extracted_logos/zoetis.png" alt="Zoetis"><img src="extracted_logos/purina.png" alt="Purina"><img src="extracted_logos/idexx.png" alt="IDEXX"><img src="extracted_logos/vetexpert.png" alt="Vetexpert"><img src="extracted_logos/hills.png" alt="Hill's"></div></div></section>
+    <section class="final-cta" id="start"><div class="container final-card"><img src="img/Accounting-img.jpg" alt="Родина з домашнім улюбленцем"><div><p class="eyebrow">Почніть уже сьогодні</p><h2>Турбота про тварину починається з одного профілю</h2><p>Створіть акаунт та зберігайте всю важливу інформацію в надійному місці.</p></div><a class="button button-primary button-large" href="account.html">Увійти в акаунт</a></div></section>
+  </main>
+  <footer class="site-footer" id="contacts"><div class="container footer-grid"><div><a class="brand footer-brand" href="#top"><img src="img/Animal-footer.png" alt="Animal.ua"></a><p>Онлайн-облік тварин — швидко, просто та надійно.</p></div><div><h3>Навігація</h3><a href="#features">Можливості</a><a href="#vets">Для ветклінік</a><a href="#chip-search">Пошук за чипом</a></div><div><h3>Контакти</h3><a href="mailto:admin@vetcontrol.net">admin@vetcontrol.net</a><a href="#start">Підтримка</a><a href="#top">Політика конфіденційності</a></div></div><div class="container copyright">© 2026 Animal.ua. Усі права захищено.</div></footer>
+  <script>
+    (() => {
+      try {
+        const session = JSON.parse(localStorage.getItem('animalua.session'));
+        const active = Boolean(session && session.access_token);
+        const link = document.querySelector('#account-entry');
+        const petLink = document.querySelector('#register-pet-link');
+        if (active && link) {
+          link.href = 'profile.html';
+          link.classList.add('profile-icon-link');
+          link.setAttribute('aria-label', 'Відкрити профіль');
+          link.title = session.user?.email || 'Мій профіль';
+          link.textContent = '';
+          fetch('/api/profile', { headers: { Authorization: `Bearer ${session.access_token}` } })
+            .then(response => response.ok ? response.json() : null)
+            .then(profile => {
+              if (!profile?.avatar_path || !link.isConnected) return;
+              return fetch('/api/photos/signed-url', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${session.access_token}` },
+                body: JSON.stringify({ path: profile.avatar_path })
+              }).then(response => response.ok ? response.json() : null).then(photo => {
+                if (!photo?.url || !link.isConnected) return;
+                const image = document.createElement('img');
+                image.className = 'profile-icon-image';
+                image.src = photo.url;
+                image.alt = '';
+                image.setAttribute('aria-hidden', 'true');
+                image.onerror = () => { image.remove(); link.classList.remove('has-avatar'); };
+                link.append(image);
+                link.classList.add('has-avatar');
+              });
+            }).catch(() => {});
+        }
+        if (active && petLink) petLink.href = 'profile.html';
+      } catch (_) {}
+    })();
+    const toggle = document.querySelector('.menu-toggle'), menu = document.querySelector('.main-nav');
+    toggle.addEventListener('click', () => { const open = toggle.getAttribute('aria-expanded') === 'true'; toggle.setAttribute('aria-expanded', String(!open)); menu.classList.toggle('is-open', !open); });
+    menu.querySelectorAll('a').forEach(link => link.addEventListener('click', () => { toggle.setAttribute('aria-expanded', 'false'); menu.classList.remove('is-open'); }));
+    document.querySelector('.chip-form').addEventListener('submit', event => { event.preventDefault(); const input = document.querySelector('#chip-number'), message = document.querySelector('.form-message'), valid = /^\d{15}$/.test(input.value); message.textContent = valid ? 'Запит прийнято. Пошук у базі буде доступний після підключення сервісу.' : 'Введіть 15 цифр номера мікрочипа.'; input.setAttribute('aria-invalid', String(!valid)); });
+  </script>
 </body>
-
 </html>

@@ -1,0 +1,2 @@
+.testimonials blockquote:nth-child(1) .testimonial-avatar{content:url("../img/reference/testimonial-dog-owner-cutout.png")}.testimonials blockquote:nth-child(2) .testimonial-avatar{content:url("../img/reference/testimonial-rabbit-owner-cutout.png")}.testimonials blockquote:nth-child(3) .testimonial-avatar{content:url("../img/reference/testimonial-senior-owner-cutout.png")}
+.testimonial-avatar{width:96px!important;height:96px!important;object-fit:contain!important;border-radius:50%;padding:3px;background:#fff0e6}

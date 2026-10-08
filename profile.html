@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="uk">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Профіль — Animal.ua</title>
+  <link rel="icon" href="img/Animal.ua.png">
+  <link rel="stylesheet" href="css/main.min.css?v=3">
+  <link rel="stylesheet" href="css/ref-overrides.css?v=11">
+  <link rel="stylesheet" href="css/account.css">
+  <link rel="stylesheet" href="css/profile.css?v=2">
+  <link rel="stylesheet" href="css/profile-layout.css?v=1">
+  <link rel="stylesheet" href="css/profile-dialog.css?v=3">
+  <link rel="stylesheet" href="css/pet-editor.css?v=4">
+</head>
+<body>
+  <header class="site-header"><div class="container nav-wrap">
+    <a class="brand" href="index.html"><img src="img/Animal.png" alt="Animal.ua"></a>
+    <div class="nav-actions"><a class="button button-ghost" href="index.html">На головну</a><button class="button button-primary" id="logout" type="button">Вийти</button></div>
+  </div></header>
+  <main class="profile-page"><div class="container">
+    <div class="profile-topline"><div><p class="eyebrow">Особистий кабінет</p><h1>Профіль користувача</h1></div><nav class="breadcrumbs"><a href="index.html">Головна</a><span>›</span><strong>Мій профіль</strong></nav></div>
+    <div class="profile-dashboard">
+      <div class="profile-left">
+        <section class="dashboard-card owner-card-panel"><div class="card-heading"><h2>Дані власника</h2><span class="status-dot">Активний</span></div>
+          <div class="owner-summary"><div class="owner-avatar">🐾</div><div><strong id="owner-summary-name">Ваш профіль</strong><span id="owner-summary-role">Власник тварини</span></div></div>
+          <form id="owner-form"><label>Ім’я та прізвище<input id="owner-name" required></label><label>Email<input id="owner-email" type="email" disabled></label><label>Телефон<input id="owner-phone" type="tel"></label><label>Тип користувача<select id="owner-role"><option value="owner">Власник тварини</option><option value="vet">Ветеринарна установа</option></select></label><button class="button button-primary" type="submit">Зберегти зміни</button><p class="form-message" id="owner-message"></p></form>
+        </section>
+      </div>
+      <section class="dashboard-card animals-card"><div class="card-heading"><div><h2>Мої тварини</h2><p>Можна додати скільки завгодно улюбленців</p></div><button class="button button-primary" id="add-animal" type="button">+ Додати тварину</button></div>
+        <label class="animal-search-label">Пошук за ім’ям, видом або номером чипа<input id="animal-search" type="search" placeholder="Почніть вводити для пошуку"></label><div id="animals-list"></div><p class="empty-state" id="animals-empty">У вас ще немає доданих тварин. Додайте першого улюбленця.</p><p class="empty-state" id="animals-no-results" hidden>За цим запитом тварин не знайдено.</p>
+      </section>
+    </div>
+  </div></main>
+  <script src="js/api-client.js?v=2"></script><script src="js/pet-editor.js?v=5"></script><script src="js/profile.js?v=17"></script>
+</body>
+</html>
