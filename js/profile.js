@@ -55,6 +55,8 @@
   }
   async function deletePhoto(path) { if (path) await AnimalApi.request('/api/photos/delete', { method: 'POST', body: JSON.stringify({ path }) }); }
   function paintOwner() {
+    const adminLink = document.querySelector('#admin-link');
+    if (adminLink) adminLink.hidden = !profile.is_admin;
     document.querySelector('#owner-name').value = profile.full_name || authName;
     document.querySelector('#owner-email').value = profile.email || '';
     document.querySelector('#owner-phone').value = profile.phone || '';

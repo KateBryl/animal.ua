@@ -7,6 +7,8 @@ CREATE TABLE IF NOT EXISTS profiles (
   password_salt text NOT NULL,
   full_name text NOT NULL DEFAULT '',
   role text NOT NULL DEFAULT 'owner' CHECK (role IN ('owner','vet')),
+  is_admin boolean NOT NULL DEFAULT false,
+  is_active boolean NOT NULL DEFAULT true,
   phone text NOT NULL DEFAULT '',
   avatar_path text,
   emergency_contact text NOT NULL DEFAULT '',
@@ -46,3 +48,14 @@ CREATE TABLE IF NOT EXISTS pets (
 );
 CREATE INDEX IF NOT EXISTS pets_owner_id_idx ON pets(owner_id);
 CREATE INDEX IF NOT EXISTS pets_owner_created_at_idx ON pets(owner_id, created_at);
+
+CREATE TABLE IF NOT EXISTS admin_audit_log (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  actor_id uuid REFERENCES profiles(id) ON DELETE SET NULL,
+  target_user_id uuid REFERENCES profiles(id) ON DELETE SET NULL,
+  action text NOT NULL,
+  details jsonb NOT NULL DEFAULT '{}'::jsonb,
+  created_at timestamptz NOT NULL DEFAULT now()
+);
+CREATE INDEX IF NOT EXISTS admin_audit_log_created_at_idx ON admin_audit_log(created_at DESC);
+CREATE INDEX IF NOT EXISTS admin_audit_log_target_user_idx ON admin_audit_log(target_user_id, created_at DESC);
