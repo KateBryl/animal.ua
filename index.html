@@ -78,6 +78,13 @@
     const toggle = document.querySelector('.menu-toggle'), menu = document.querySelector('.main-nav');
     toggle.addEventListener('click', () => { const open = toggle.getAttribute('aria-expanded') === 'true'; toggle.setAttribute('aria-expanded', String(!open)); menu.classList.toggle('is-open', !open); });
     menu.querySelectorAll('a').forEach(link => link.addEventListener('click', () => { toggle.setAttribute('aria-expanded', 'false'); menu.classList.remove('is-open'); }));
+    document.querySelectorAll('a[href="#chip-search"]').forEach(link => link.addEventListener('click', event => {
+      event.preventDefault();
+      const input = document.querySelector('#chip-number');
+      input.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      input.focus({ preventScroll: true });
+      history.replaceState(null, '', '#chip-search');
+    }));
     document.querySelector('.chip-form').addEventListener('submit', event => { event.preventDefault(); const input = document.querySelector('#chip-number'), message = document.querySelector('.form-message'), valid = /^\d{15}$/.test(input.value); message.textContent = valid ? 'Запит прийнято. Пошук у базі буде доступний після підключення сервісу.' : 'Введіть 15 цифр номера мікрочипа.'; input.setAttribute('aria-invalid', String(!valid)); });
   </script>
 </body>
