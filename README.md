@@ -1,21 +1,21 @@
 # Animal.ua
 
-Static frontend with a Node.js API backed by PostgreSQL. User accounts, profiles, pets, and care records are stored in PostgreSQL. Uploaded photos and documents are stored in the local `uploads/` directory and served through temporary signed links.
+Статичний фронтенд і API на Node.js, що працюють із PostgreSQL. Облікові записи, профілі, дані тварин і догляду зберігаються в PostgreSQL. Завантажені фото й документи зберігаються локально в каталозі `uploads/` і доступні за тимчасовими підписаними посиланнями.
 
-## Local run
+## Локальний запуск
 
-1. PostgreSQL must be running and `DATABASE_URL` and `AUTH_SECRET` must be set in `.env`.
-2. Run `npm install` to install the PostgreSQL driver.
-3. Run `npm start` and open `http://localhost:3000` (not the `file:///` page). The server applies `postgres/schema.sql` and any unapplied files in `postgres/migrations/` at startup. Migration versions are recorded in `schema_migrations`.
+1. Переконайтеся, що PostgreSQL запущено, а в `.env` задано `DATABASE_URL` і `AUTH_SECRET`.
+2. Виконайте `npm install`, щоб установити драйвер PostgreSQL.
+3. Запустіть `npm start` і відкрийте `http://localhost:3000` (не сторінку `file:///`). Під час запуску сервер застосовує `postgres/schema.sql` і всі ще не виконані файли з `postgres/migrations/`. Версії міграцій записуються в таблицю `schema_migrations`.
 
-The local database and role are named `animalua`. Keep `.env` private. Back up both the PostgreSQL database and `uploads/` directory.
+Локальна база даних і роль PostgreSQL мають назву `animalua`. Зберігайте `.env` у приватному доступі. Робіть резервні копії бази PostgreSQL і каталогу `uploads/`.
 
 ## API
 
-- `POST /api/auth/signup`, `POST /api/auth/login`, `POST /api/auth/refresh`, `POST /api/auth/logout`
-- `GET` / `PATCH /api/profile`
-- `GET` / `POST /api/pets`
-- `PATCH` / `DELETE /api/pets/:id`
-- `POST /api/photos`, `POST /api/photos/signed-url`, `POST /api/photos/delete`
-- `POST /api/documents`, `POST /api/documents/signed-url`
-- `GET /api/health` (includes PostgreSQL connectivity status)
+- `POST /api/auth/signup`, `POST /api/auth/login`, `POST /api/auth/refresh`, `POST /api/auth/logout` — реєстрація, вхід, оновлення сесії та вихід
+- `GET` / `PATCH /api/profile` — перегляд і зміна профілю
+- `GET` / `POST /api/pets` — перегляд і додавання тварин
+- `PATCH` / `DELETE /api/pets/:id` — зміна й видалення картки тварини
+- `POST /api/photos`, `POST /api/photos/signed-url`, `POST /api/photos/delete` — завантаження, отримання посилання та видалення фото
+- `POST /api/documents`, `POST /api/documents/signed-url` — завантаження документа й отримання посилання
+- `GET /api/health` — перевірка API та підключення до PostgreSQL
