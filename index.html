@@ -7,7 +7,7 @@
   <title>Animal.ua — турбота про тварину в одному сервісі</title>
   <link rel="icon" href="img/Animal.ua.png">
   <link rel="stylesheet" href="css/main.min.css?v=3">
-  <link rel="stylesheet" href="css/ref-overrides.css?v=11">
+  <link rel="stylesheet" href="css/ref-overrides.css?v=12">
   <link rel="stylesheet" href="css/testimonial-overrides.css?v=2">
 </head>
 <body>
@@ -30,7 +30,7 @@
     </section>
     <section class="stats-section" aria-label="Переваги сервісу"><div class="container stats-grid"><div class="stat"><img src="img/pets.png" alt=""><div><strong>50 000+</strong><span>зареєстрованих тварин</span></div></div><div class="stat"><img src="img/auto-conversations.png" alt=""><div><strong>320+</strong><span>ветеринарних установ</span></div></div><div class="stat"><img src="img/checkmark-circle.png" alt=""><div><strong>24/7</strong><span>доступ до даних</span></div></div></div></section>
     <section class="section-space audience" id="features"><div class="container"><div class="section-heading"><p class="eyebrow">Один сервіс — різні сценарії</p><h2>Для кого <span>Animal.ua?</span></h2><p>Оберіть свій сценарій і отримайте потрібні інструменти без зайвого.</p></div><div class="audience-grid"><article class="audience-card owner-card"><div><h3>Власникам тварин</h3><p>Зберігайте важливу інформацію про улюбленця, плануйте події та будьте спокійні за його безпеку.</p><a href="#start">Дізнатися більше</a></div><img src="img/Layer_3.png" alt="Власниця обіймає кота"></article><article class="audience-card vet-card" id="vets"><div><h3>Ветеринарним установам</h3><p>Керуйте записами, створюйте документи та надавайте якісний сервіс клієнтам.</p><a href="#start">Дізнатися більше</a></div><img src="img/Layer_4.png" alt="Ветеринарка оглядає собаку"></article></div></div></section>
-    <section class="chip-section section-space" id="chip-search"><div class="container chip-card"><div class="chip-icon"><img src="img/search-focus.png" alt=""></div><div><h2>Перевірте номер чипа</h2><p>Дізнайтеся інформацію про тварину за 15-значним номером мікрочипа.</p></div><form class="chip-form" action="#chip-search"><label class="sr-only" for="chip-number">15-значний номер чипа</label><input id="chip-number" name="chip" inputmode="numeric" maxlength="15" placeholder="Введіть 15-значний номер" pattern="[0-9]{15}"><button class="button button-primary" type="submit">Знайти тварину</button><p class="form-message" aria-live="polite"></p></form></div></section>
+    <section class="chip-section section-space" id="chip-search"><div class="container chip-card"><div class="chip-icon"><img src="img/search-focus.png" alt=""></div><div><h2>Перевірте номер чипа</h2><p>Дізнайтеся інформацію про тварину за 15-значним номером мікрочипа.</p></div><form class="chip-form" action="#chip-search"><label class="sr-only" for="chip-number">15-значний номер чипа</label><input id="chip-number" name="chip" inputmode="numeric" maxlength="15" placeholder="Введіть 15-значний номер" pattern="[0-9]{15}" required><button class="button button-primary" type="submit">Знайти тварину</button><p class="form-message" aria-live="polite"></p><div id="chip-search-result" class="chip-search-result" role="status" aria-live="polite" hidden></div></form></div></section>
     <section class="how section-space"><div class="container"><div class="section-heading"><p class="eyebrow">Простий старт</p><h2>Як це <span>працює</span></h2></div><ol class="steps-grid"><li><span class="step-number">1</span><img src="img/user-account.png" alt=""><h3>Створіть профіль</h3><p>Зареєструйтеся та заповніть коротку інформацію про себе.</p></li><li><span class="step-number">2</span><img src="img/pets.png" alt=""><h3>Додайте тварину</h3><p>Внесіть дані улюбленця та, за потреби, номер його мікрочипа.</p></li><li><span class="step-number">3</span><img src="img/checkmark-circle.png" alt=""><h3>Керуйте даними</h3><p>Зберігайте документи, стежте за подіями та історією здоров’я.</p></li></ol></div></section>
     <section class="services section-space" id="services"><div class="container"><div class="section-heading"><p class="eyebrow">Усе в одному місці</p><h2>Все необхідне для <span>турботи про тварину</span></h2></div><div class="services-grid"><article><img src="img/note-edit.png" alt=""><h3>Профіль тварини</h3><p>Дані, документи та фото у власному кабінеті.</p></article><article><img src="img/calendar-03.png" alt=""><h3>Історія здоров’я</h3><p>Вакцинації, візити та рекомендації під контролем.</p></article><article><img src="img/auto-conversations.png" alt=""><h3>Нагадування</h3><p>Не пропускайте важливі події та щеплення.</p></article><article><img src="img/search.png" alt=""><h3>Пошук за чипом</h3><p>Швидко знаходьте тварину у відкритих даних.</p></article><article><img src="img/analytics-01.png" alt=""><h3>Звіти та аналітика</h3><p>Зручна статистика для власників і клінік.</p></article></div></div></section>
     <section class="testimonials section-space" id="about"><div class="container"><div class="section-heading"><p class="eyebrow">Реальні історії</p><h2>Що кажуть <span>наші користувачі</span></h2></div><div class="testimonials-grid"><blockquote><div class="quote-mark" aria-hidden="true">“</div><p>Animal.ua допоміг мені знайти нашого кота за номером чипа. Сервіс простий, а підтримка — найкраща!</p><div class="testimonial-meta"><img src="img/stars.png" alt="5 з 5"><div><strong>Олена К.</strong><span>власниця кота</span></div><img class="testimonial-avatar" src="img/Animal.png" alt=""></div></blockquote><blockquote><div class="quote-mark" aria-hidden="true">“</div><p>Зручний інструмент для клініки. Економимо час і надаємо клієнтам якісний сервіс.</p><div class="testimonial-meta"><img src="img/stars.png" alt="5 з 5"><div><strong>Ігор М.</strong><span>керівник ветклініки</span></div><img class="testimonial-avatar" src="img/Animal.png" alt=""></div></blockquote><blockquote><div class="quote-mark" aria-hidden="true">“</div><p>Все про мого улюбленця в одному місці. Нагадування довго виручають!</p><div class="testimonial-meta"><img src="img/stars.png" alt="5 з 5"><div><strong>Марія П.</strong><span>власниця собаки</span></div><img class="testimonial-avatar" src="img/Animal.png" alt=""></div></blockquote></div></div></section>
@@ -85,7 +85,28 @@
       input.focus({ preventScroll: true });
       history.replaceState(null, '', '#chip-search');
     }));
-    document.querySelector('.chip-form').addEventListener('submit', event => { event.preventDefault(); const input = document.querySelector('#chip-number'), message = document.querySelector('.form-message'), valid = /^\d{15}$/.test(input.value); message.textContent = valid ? 'Запит прийнято. Пошук у базі буде доступний після підключення сервісу.' : 'Введіть 15 цифр номера мікрочипа.'; input.setAttribute('aria-invalid', String(!valid)); });
+    const chipForm = document.querySelector('.chip-form');
+    chipForm.addEventListener('submit', async event => {
+      event.preventDefault();
+      const input = document.querySelector('#chip-number'), message = chipForm.querySelector('.form-message'), resultBox = document.querySelector('#chip-search-result');
+      const chip = input.value.trim(), valid = /^\d{15}$/.test(chip);
+      input.setAttribute('aria-invalid', String(!valid)); resultBox.hidden = true; resultBox.replaceChildren();
+      if (!valid) { message.textContent = 'Введіть 15 цифр номера мікрочипа.'; return; }
+      const submit = chipForm.querySelector('button[type="submit"]'); submit.disabled = true; message.textContent = 'Шукаємо тварину…';
+      try {
+        const response = await fetch(`/api/pets/lookup?chip=${encodeURIComponent(chip)}`, { cache:'no-store' });
+        const data = await response.json();
+        if (!response.ok) { message.textContent = data.error || 'Не вдалося виконати пошук.'; return; }
+        const pet = data.pet, card = document.createElement('article'), title = document.createElement('h3');
+        card.className = 'chip-result-card'; title.textContent = pet.name || 'Тварину знайдено'; card.append(title);
+        for (const [label, value] of [['Вид',pet.species],['Порода',pet.breed],['Стать',pet.sex],['Колір',pet.color],['Номер чипа',chip]]) {
+          if (!value) continue;
+          const detail = document.createElement('p'); detail.textContent = `${label}: ${value}`; card.append(detail);
+        }
+        resultBox.append(card); resultBox.hidden = false; message.textContent = 'Картку тварини знайдено.';
+      } catch (_) { message.textContent = 'Не вдалося з’єднатися із сервером. Спробуйте ще раз.'; }
+      finally { submit.disabled = false; }
+    });
   </script>
 </body>
 </html>

@@ -11,6 +11,28 @@
   const authUser = session.user || {};
   const userMetadata = authUser.user_metadata || authUser.userMetadata || {};
   const authName = userMetadata.full_name || userMetadata.name || authUser.email?.split('@')[0] || '';
+  const phoneInput = document.querySelector('#owner-phone');
+  const phoneError = 'Вкажіть український номер 0XXXXXXXXX або міжнародний номер із кодом країни.';
+  function normalizePhone(value) {
+    const input = String(value || '').trim();
+    if (!input) return '';
+    if (!/^\+?[\d\s().-]+$/.test(input)) return null;
+    const digits = input.replace(/\D/g, '');
+    if (input.startsWith('+') && digits.length >= 8 && digits.length <= 15) return `+${digits}`;
+    if (!input.startsWith('+') && digits.startsWith('380') && digits.length === 12) return `+${digits}`;
+    if (!input.startsWith('+') && digits.startsWith('0') && digits.length === 10) return `+38${digits}`;
+    return null;
+  }
+  function validatePhone() {
+    const valid = normalizePhone(phoneInput.value) !== null;
+    phoneInput.setCustomValidity(valid ? '' : phoneError);
+    return valid;
+  }
+  phoneInput.addEventListener('input', validatePhone);
+  phoneInput.addEventListener('blur', () => {
+    const normalized = normalizePhone(phoneInput.value);
+    if (normalized) phoneInput.value = normalized;
+  });
   let profile = { full_name: authName, email: authUser.email || '', phone: '', role: 'owner', avatar_path: null, emergency_contact: '', schema_updated: false };
   let pets = [];
 
@@ -84,12 +106,30 @@
     catch (error) { message.textContent = error.message; }
   });
   async function saveOwner() {
-    profile = await AnimalApi.request('/api/profile', { method: 'PATCH', body: JSON.stringify({ full_name: document.querySelector('#owner-name').value.trim(), phone: document.querySelector('#owner-phone').value.trim(), role: document.querySelector('#owner-role').value, avatar_path: profile.avatar_path || null }) });
+    const phone = normalizePhone(phoneInput.value);
+    if (phone === null) { phoneInput.setCustomValidity(phoneError); phoneInput.reportValidity(); throw new Error(phoneError); }
+    phoneInput.setCustomValidity(''); if (phoneInput.value.trim()) phoneInput.value = phone;
+    profile = await AnimalApi.request('/api/profile', { method: 'PATCH', body: JSON.stringify({ full_name: document.querySelector('#owner-name').value.trim(), phone, role: document.querySelector('#owner-role').value, avatar_path: profile.avatar_path || null }) });
     paintOwner();
   }
   document.querySelector('#owner-form').addEventListener('submit', async (event) => {
     event.preventDefault(); const message = document.querySelector('#owner-message'); message.textContent = 'Зберігаю…';
     try { await saveOwner(); message.textContent = profile.schema_updated ? 'Інформацію збережено.' : 'Основні дані збережено. Для збереження контактної особи та нових даних тварин виконайте оновлену схему Supabase.'; } catch (error) { message.textContent = error.message; }
+  });
+
+  document.querySelector('#password-form').addEventListener('submit', async (event) => {
+    event.preventDefault();
+    const form = event.currentTarget, message = document.querySelector('#password-message'), button = form.querySelector('button[type="submit"]');
+    const currentPassword = document.querySelector('#current-password').value;
+    const newPassword = document.querySelector('#new-password').value;
+    const confirmPassword = document.querySelector('#confirm-password').value;
+    if (newPassword !== confirmPassword) { message.textContent = 'Нові паролі не збігаються.'; return; }
+    button.disabled = true; message.textContent = 'Змінюю пароль…';
+    try {
+      await AnimalApi.request('/api/profile/password', { method:'POST', body:JSON.stringify({currentPassword,newPassword}) });
+      form.reset(); message.textContent = 'Пароль змінено. Інші активні сеанси завершено.';
+    } catch (error) { message.textContent = error.message || 'Не вдалося змінити пароль.'; }
+    finally { button.disabled = false; }
   });
 
   function fromApi(pet) { const cached = readCareCache()[pet.id] || {}; return { id: pet.id, name: pet.name || '', species: pet.species || '', breed: pet.breed || '', sex: pet.sex || '', birthDate: pet.birth_date || '', color: pet.color || '', weight: pet.weight ?? '', chip: pet.chip_number || '', vaccination: pet.last_vaccination || '', notes: pet.notes || '', photo_path: pet.photo_path || null, care: { ...blankCare(), ...cached, ...(pet.care_data || {}) } }; }

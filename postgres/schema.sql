@@ -28,6 +28,14 @@ CREATE TABLE IF NOT EXISTS app_sessions (
 CREATE INDEX IF NOT EXISTS app_sessions_user_id_idx ON app_sessions(user_id);
 CREATE INDEX IF NOT EXISTS app_sessions_expires_at_idx ON app_sessions(expires_at);
 
+CREATE TABLE IF NOT EXISTS signup_rate_limits (
+  key_hash text PRIMARY KEY,
+  window_started_at timestamptz NOT NULL,
+  hits integer NOT NULL CHECK (hits > 0),
+  updated_at timestamptz NOT NULL DEFAULT now()
+);
+CREATE INDEX IF NOT EXISTS signup_rate_limits_updated_at_idx ON signup_rate_limits(updated_at);
+
 CREATE TABLE IF NOT EXISTS pets (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   owner_id uuid NOT NULL REFERENCES profiles(id) ON DELETE CASCADE,

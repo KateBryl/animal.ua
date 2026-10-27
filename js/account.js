@@ -4,14 +4,16 @@
   const title = document.querySelector('#auth-title');
   const submit = document.querySelector('#auth-submit');
   const message = document.querySelector('#auth-message');
+  const honeypot = document.querySelector('#auth-website');
   let signup = false;
+  let signupStartedAt = Date.now();
   function render() {
     title.textContent = signup ? 'Створити акаунт' : 'Увійти в акаунт';
     submit.textContent = signup ? 'Зареєструватися' : 'Увійти';
     switcher.textContent = signup ? 'Вже маєте акаунт? Увійти' : 'Ще немає акаунта? Зареєструватися';
     message.textContent = '';
   }
-  switcher.addEventListener('click', () => { signup = !signup; render(); });
+  switcher.addEventListener('click', () => { signup = !signup; if (signup) signupStartedAt = Date.now(); render(); });
   form.addEventListener('submit', async (event) => {
     event.preventDefault();
     submit.disabled = true;
@@ -21,7 +23,7 @@
       const password = document.querySelector('#auth-password').value;
       const result = await AnimalApi.request(signup ? '/api/auth/signup' : '/api/auth/login', {
         method: 'POST',
-        body: JSON.stringify({ email, password })
+        body: JSON.stringify({ email, password, website: honeypot.value, startedAt: signupStartedAt })
       });
       if (!AnimalApi.saveSession(result, { email })) {
         message.textContent = 'Акаунт створено. Увімкніть вхід без підтвердження email у налаштуваннях Supabase або підтвердьте адресу й увійдіть.';

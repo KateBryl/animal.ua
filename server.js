@@ -2,6 +2,7 @@ const http = require('node:http');
 const fs = require('node:fs');
 const path = require('node:path');
 const crypto = require('node:crypto');
+const net = require('node:net');
 const { promisify } = require('node:util');
 const { Pool } = require('pg');
 
@@ -24,6 +25,7 @@ const pool = DATABASE_URL ? new Pool({ connectionString: DATABASE_URL, max: 10 }
 const uploadsDir = path.join(ROOT, 'uploads');
 const MIME = { '.html': 'text/html; charset=utf-8', '.css': 'text/css; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.json': 'application/json; charset=utf-8', '.png': 'image/png', '.jpg': 'image/jpeg', '.jpeg': 'image/jpeg', '.svg': 'image/svg+xml', '.webp': 'image/webp', '.ico': 'image/x-icon' };
 const scrypt = promisify(crypto.scrypt);
+const PHONE_ERROR = 'Вкажіть номер у форматі 0XXXXXXXXX або +код країни та номер.';
 
 function json(res, status, data) {
   const body = JSON.stringify(data);
@@ -39,8 +41,19 @@ async function readJson(req, maxBytes = 8 * 1024 * 1024) {
 }
 
 const tokenHash = (token) => crypto.createHash('sha256').update(token).digest('hex');
+const signupLimitHash = (type, value) => crypto.createHmac('sha256', AUTH_SECRET).update(`signup:${type}:${value}`).digest('hex');
 const makeToken = () => crypto.randomBytes(32).toString('base64url');
 const emailOf = (value) => String(value || '').trim().toLowerCase().slice(0, 254);
+function phoneOf(value) {
+  const input = String(value || '').trim();
+  if (!input) return '';
+  if (!/^\+?[\d\s().-]+$/.test(input)) throw Object.assign(new Error(PHONE_ERROR), { status:400 });
+  const digits = input.replace(/\D/g, '');
+  if (input.startsWith('+') && digits.length >= 8 && digits.length <= 15) return `+${digits}`;
+  if (!input.startsWith('+') && digits.startsWith('380') && digits.length === 12) return `+${digits}`;
+  if (!input.startsWith('+') && digits.startsWith('0') && digits.length === 10) return `+38${digits}`;
+  throw Object.assign(new Error(PHONE_ERROR), { status:400 });
+}
 const publicUser = (row) => ({ id: row.id, email: row.email, user_metadata: { full_name: row.full_name || '', role: row.role || 'owner', is_admin: Boolean(row.is_admin) } });
 const authResult = (user, access, refresh) => ({ access_token: access, refresh_token: refresh, token_type: 'bearer', expires_in: 3600, user });
 
@@ -60,6 +73,25 @@ async function currentUser(req) {
 
 function requireAdmin(user) {
   if (!user.is_admin) throw Object.assign(new Error('Admin access required'), { status: 403 });
+}
+
+function signupClientIp(req) {
+  const peer = String(req.socket.remoteAddress || 'unknown').replace(/^::ffff:/, '');
+  const isLocalProxy = peer === '127.0.0.1' || peer === '::1';
+  const forwarded = isLocalProxy ? String(req.headers['x-real-ip'] || '').trim() : '';
+  return forwarded && net.isIP(forwarded) ? forwarded : peer;
+}
+
+async function consumeSignupLimit(type, value, maxHits, windowSeconds) {
+  const result = await pool.query(`
+    INSERT INTO signup_rate_limits(key_hash, window_started_at, hits, updated_at)
+    VALUES($1, now(), 1, now())
+    ON CONFLICT(key_hash) DO UPDATE SET
+      hits = CASE WHEN signup_rate_limits.window_started_at <= now() - make_interval(secs => $2) THEN 1 ELSE signup_rate_limits.hits + 1 END,
+      window_started_at = CASE WHEN signup_rate_limits.window_started_at <= now() - make_interval(secs => $2) THEN now() ELSE signup_rate_limits.window_started_at END,
+      updated_at = now()
+    RETURNING hits`, [signupLimitHash(type, value), windowSeconds]);
+  if (result.rows[0].hits > maxHits) throw Object.assign(new Error('Забагато спроб реєстрації. Спробуйте пізніше.'), { status:429 });
 }
 
 async function listAccounts(res, url) {
@@ -96,7 +128,6 @@ async function updateAccount(req, res, actor, targetId) {
     const found = await client.query('SELECT id,email,full_name,role,is_admin,is_active,created_at FROM profiles WHERE id=$1 FOR UPDATE', [targetId]);
     if (!found.rowCount) { await client.query('ROLLBACK'); return json(res,404,{error:'Account not found'}); }
     const before = found.rows[0];
-    if (before.is_admin) throw Object.assign(new Error('Admin accounts must be managed directly in the database'), { status:409 });
     const nextRole = Object.hasOwn(body,'role') ? body.role : before.role;
     const nextActive = Object.hasOwn(body,'is_active') ? body.is_active : before.is_active;
     const changes = {};
@@ -109,6 +140,32 @@ async function updateAccount(req, res, actor, targetId) {
     await client.query('INSERT INTO admin_audit_log(actor_id,target_user_id,action,details) VALUES($1,$2,$3,$4::jsonb)', [actor.id,targetId,'account.updated',JSON.stringify(changes)]);
     await client.query('COMMIT');
     return json(res,200,{account:updated.rows[0],changed:true});
+  } catch (error) {
+    await client.query('ROLLBACK');
+    throw error;
+  } finally { client.release(); }
+}
+
+async function resetAccountPassword(req, res, actor, targetId) {
+  const body = await readJson(req, 16 * 1024), password = String(body.newPassword || '');
+  if (password.length < 8 || password.length > 1024) throw Object.assign(new Error('Пароль має містити від 8 до 1024 символів.'), { status:400 });
+  if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(targetId)) throw Object.assign(new Error('Invalid account id'), { status:400 });
+  const client = await pool.connect();
+  try {
+    await client.query('BEGIN');
+    const found = await client.query('SELECT id FROM profiles WHERE id=$1 FOR UPDATE', [targetId]);
+    if (!found.rowCount) throw Object.assign(new Error('Обліковий запис не знайдено.'), { status:404 });
+    const salt = crypto.randomBytes(16), hash = await scrypt(password, salt, 64);
+    await client.query('UPDATE profiles SET password_hash=$2,password_salt=$3,updated_at=now() WHERE id=$1', [targetId,hash.toString('hex'),salt.toString('hex')]);
+    if (targetId === actor.id) {
+      const access = (req.headers.authorization || '').replace(/^Bearer\s+/i, '');
+      await client.query('DELETE FROM app_sessions WHERE user_id=$1 AND access_hash<>$2', [targetId,tokenHash(access)]);
+    } else {
+      await client.query('DELETE FROM app_sessions WHERE user_id=$1', [targetId]);
+    }
+    await client.query('INSERT INTO admin_audit_log(actor_id,target_user_id,action,details) VALUES($1,$2,$3,$4::jsonb)', [actor.id,targetId,'account.password_changed',JSON.stringify({sessions_revoked:true})]);
+    await client.query('COMMIT');
+    return json(res,200,{ok:true,sessionsRevoked:true});
   } catch (error) {
     await client.query('ROLLBACK');
     throw error;
@@ -158,6 +215,14 @@ async function handleApi(req, res, url) {
     if (!pool) return json(res, 503, { ok:false, database:false });
     await pool.query('SELECT 1'); return json(res, 200, { ok:true, database:true });
   }
+  if (req.method === 'GET' && route === '/api/pets/lookup') {
+    const chip = String(url.searchParams.get('chip') || '').trim();
+    if (!/^\d{15}$/.test(chip)) throw Object.assign(new Error('Введіть 15 цифр номера мікрочипа.'), { status:400 });
+    const result = await pool.query('SELECT name,species,breed,sex,color FROM pets WHERE chip_number=$1 LIMIT 2', [chip]);
+    if (result.rowCount > 1) throw Object.assign(new Error('За цим номером знайдено кілька карток. Зверніться до підтримки.'), { status:409 });
+    if (!result.rowCount) throw Object.assign(new Error('Тварину за таким номером не знайдено.'), { status:404 });
+    return json(res,200,{pet:result.rows[0]});
+  }
   const fileRoute = route.match(/^\/api\/files\/([0-9a-f-]{36})\/([0-9a-f-]{36}\.(?:jpg|png|webp|pdf|doc|docx))$/i);
   if (fileRoute && req.method === 'GET') {
     const expires = Number(url.searchParams.get('expires')), sig = url.searchParams.get('signature') || '';
@@ -173,6 +238,11 @@ async function handleApi(req, res, url) {
   if (req.method === 'POST' && route === '/api/auth/signup') {
     const body = await readJson(req), email = emailOf(body.email), password = String(body.password || '');
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) || password.length < 8) throw Object.assign(new Error('Вкажіть коректний email і пароль не коротший за 8 символів.'), { status:400 });
+    const elapsed = Date.now() - Number(body.startedAt);
+    if (String(body.website || '').trim() || !Number.isFinite(elapsed) || elapsed < 2500) throw Object.assign(new Error('Не вдалося підтвердити реєстрацію. Оновіть сторінку та спробуйте ще раз.'), { status:400 });
+    await consumeSignupLimit('ip', signupClientIp(req), 10, 60 * 60);
+    await consumeSignupLimit('email', email, 5, 24 * 60 * 60);
+    if (crypto.randomInt(100) === 0) await pool.query("DELETE FROM signup_rate_limits WHERE updated_at < now() - interval '2 days'");
     const salt = crypto.randomBytes(16), hash = await scrypt(password, salt, 64);
     try {
       const result = await pool.query('INSERT INTO profiles(email,password_hash,password_salt,full_name) VALUES($1,$2,$3,$4) RETURNING *', [email,hash.toString('hex'),salt.toString('hex'),String(body.fullName||'').slice(0,160)]);
@@ -200,6 +270,8 @@ async function handleApi(req, res, url) {
     if(route.startsWith('/api/admin/')) {
       requireAdmin(user);
       if(req.method==='GET'&&route==='/api/admin/accounts') return listAccounts(res,url);
+      const passwordMatch=route.match(/^\/api\/admin\/accounts\/([0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12})\/password$/i);
+      if(req.method==='POST'&&passwordMatch) return resetAccountPassword(req,res,user,passwordMatch[1]);
       if(req.method==='PATCH') {
         const accountMatch=route.match(/^\/api\/admin\/accounts\/([0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12})$/i);
         if(accountMatch) return updateAccount(req,res,user,accountMatch[1]);
@@ -207,9 +279,32 @@ async function handleApi(req, res, url) {
       if(req.method==='GET'&&route==='/api/admin/audit') return listAdminAudit(res,url);
       return json(res,404,{error:'Admin API route not found'});
     }
+    if(req.method==='POST'&&route==='/api/profile/password'){
+      const body=await readJson(req,16*1024),currentPassword=String(body.currentPassword||''),newPassword=String(body.newPassword||'');
+      if(!currentPassword)throw Object.assign(new Error('Введіть поточний пароль.'),{status:400});
+      if(newPassword.length<8||newPassword.length>1024)throw Object.assign(new Error('Новий пароль має містити від 8 до 1024 символів.'),{status:400});
+      if(currentPassword===newPassword)throw Object.assign(new Error('Новий пароль має відрізнятися від поточного.'),{status:400});
+      const client=await pool.connect();
+      try{
+        await client.query('BEGIN');
+        const found=await client.query('SELECT password_hash,password_salt,is_active FROM profiles WHERE id=$1 FOR UPDATE',[id]);
+        if(!found.rowCount)throw Object.assign(new Error('Обліковий запис не знайдено.'),{status:404});
+        if(!found.rows[0].is_active)throw Object.assign(new Error('Обліковий запис деактивовано.'),{status:403});
+        const row=found.rows[0],storedHash=Buffer.from(row.password_hash,'hex'),salt=Buffer.from(row.password_salt,'hex');
+        if(storedHash.length!==64||salt.length!==16)throw new Error('Invalid stored password credentials.');
+        const suppliedHash=await scrypt(currentPassword,salt,64);
+        if(storedHash.length!==suppliedHash.length||!crypto.timingSafeEqual(suppliedHash,storedHash))throw Object.assign(new Error('Поточний пароль неправильний.'),{status:401});
+        const nextSalt=crypto.randomBytes(16),nextHash=await scrypt(newPassword,nextSalt,64);
+        await client.query('UPDATE profiles SET password_hash=$2,password_salt=$3,updated_at=now() WHERE id=$1',[id,nextHash.toString('hex'),nextSalt.toString('hex')]);
+        const access=(req.headers.authorization||'').replace(/^Bearer\s+/i,'');
+        await client.query('DELETE FROM app_sessions WHERE user_id=$1 AND access_hash<>$2',[id,tokenHash(access)]);
+        await client.query('COMMIT');
+        return json(res,200,{ok:true,otherSessionsRevoked:true});
+      }catch(error){await client.query('ROLLBACK');throw error;}finally{client.release();}
+    }
     if(req.method==='GET'&&route==='/api/profile') return json(res,200,{id,full_name:user.full_name||'',phone:user.phone||'',role:user.role||'owner',is_admin:Boolean(user.is_admin),avatar_path:user.avatar_path||null,emergency_contact:user.emergency_contact||'',schema_updated:true,email:user.email});
     if(req.method==='PATCH'&&route==='/api/profile'){
-      const body=await readJson(req);const result=await pool.query('UPDATE profiles SET full_name=$2,phone=$3,role=$4,avatar_path=$5,emergency_contact=$6,updated_at=now() WHERE id=$1 RETURNING *',[id,String(body.full_name||'').slice(0,160),String(body.phone||'').slice(0,40),body.role==='vet'?'vet':'owner',body.avatar_path||null,String(body.emergency_contact||'').slice(0,240)]);
+      const body=await readJson(req),phone=phoneOf(body.phone);const result=await pool.query('UPDATE profiles SET full_name=$2,phone=$3,role=$4,avatar_path=$5,emergency_contact=$6,updated_at=now() WHERE id=$1 RETURNING *',[id,String(body.full_name||'').slice(0,160),phone,body.role==='vet'?'vet':'owner',body.avatar_path||null,String(body.emergency_contact||'').slice(0,240)]);
       return json(res,200,{...result.rows[0],schema_updated:true,email:user.email});
     }
     if(req.method==='GET'&&route==='/api/pets'){const r=await pool.query('SELECT * FROM pets WHERE owner_id=$1 ORDER BY created_at ASC',[id]);return json(res,200,r.rows);}
@@ -258,7 +353,7 @@ async function main(){
   }
   await fs.promises.mkdir(uploadsDir,{recursive:true,mode:0o700});
   const server=http.createServer(async(req,res)=>{
-    try{const url=new URL(req.url,`http://${req.headers.host||'localhost'}`);if(url.pathname.startsWith('/api/'))return await handleApi(req,res,url);if(req.method!=='GET'&&req.method!=='HEAD')return json(res,405,{error:'Method not allowed'});let pathname=decodeURIComponent(url.pathname);if(pathname==='/')pathname='/index.html';if(pathname==='/admin'||pathname==='/admin/')pathname='/admin.html';if(pathname.split('/').some(x=>x.startsWith('.'))||pathname==='/server.js')return json(res,404,{error:'Not found'});const file=path.resolve(ROOT,`.${pathname}`);if(!file.startsWith(ROOT+path.sep))return json(res,403,{error:'Forbidden'});const stat=await fs.promises.stat(file);if(!stat.isFile())return json(res,404,{error:'Not found'});res.writeHead(200,{'content-type':MIME[path.extname(file).toLowerCase()]||'application/octet-stream','content-length':stat.size});if(req.method==='HEAD')return res.end();fs.createReadStream(file).pipe(res);}catch(e){if(req.url?.startsWith('/api/'))console.error(`[api] ${req.method} ${req.url.split('?')[0]}: ${e.message}`);json(res,e.status||500,{error:e.message||'Internal server error'});}
+    try{const url=new URL(req.url,`http://${req.headers.host||'localhost'}`);if(url.pathname.startsWith('/api/'))return await handleApi(req,res,url);if(req.method!=='GET'&&req.method!=='HEAD')return json(res,405,{error:'Method not allowed'});let pathname=decodeURIComponent(url.pathname);if(pathname==='/')pathname='/index.html';if(pathname==='/admin'||pathname==='/admin/')pathname='/admin.html';if(pathname.split('/').some(x=>x.startsWith('.'))||pathname==='/server.js')return json(res,404,{error:'Not found'});const file=path.resolve(ROOT,`.${pathname}`);if(!file.startsWith(ROOT+path.sep))return json(res,403,{error:'Forbidden'});const stat=await fs.promises.stat(file);if(!stat.isFile())return json(res,404,{error:'Not found'});const headers={'content-type':MIME[path.extname(file).toLowerCase()]||'application/octet-stream','content-length':stat.size};if(path.extname(file).toLowerCase()==='.html')headers['cache-control']='no-store';res.writeHead(200,headers);if(req.method==='HEAD')return res.end();fs.createReadStream(file).pipe(res);}catch(e){if(req.url?.startsWith('/api/'))console.error(`[api] ${req.method} ${req.url.split('?')[0]}: ${e.message}`);json(res,e.status||500,{error:e.message||'Internal server error'});}
   });
   server.listen(PORT,'0.0.0.0',()=>console.log(`Animal.ua connected to PostgreSQL; listening on http://localhost:${PORT}`));
 }

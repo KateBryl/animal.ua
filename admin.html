@@ -6,7 +6,7 @@
   <title>Керування обліковими записами — Animal.ua</title>
   <link rel="icon" href="img/Animal.ua.png">
   <link rel="stylesheet" href="css/main.min.css?v=3">
-  <link rel="stylesheet" href="css/admin.css?v=1">
+  <link rel="stylesheet" href="css/admin.css?v=3">
 </head>
 <body>
   <header class="site-header"><div class="container admin-nav">
@@ -27,7 +27,7 @@
       <article><span>Ветеринари</span><strong id="stat-vets">—</strong></article>
     </section>
     <section class="admin-card" aria-labelledby="accounts-title">
-      <div class="admin-card-heading"><div><h2 id="accounts-title">Користувачі</h2><p>Зміни ролі зберігаються одразу. Деактивація відкликає всі активні сесії.</p></div>
+      <div class="admin-card-heading"><div><h2 id="accounts-title">Користувачі</h2><p>Зміни ролі зберігаються одразу. Деактивація або зміна пароля завершує активні сеанси користувача.</p></div>
         <label class="admin-search">Пошук<input id="account-search" type="search" placeholder="Ім’я або email" autocomplete="off"></label>
       </div>
       <p id="admin-message" class="admin-message" role="status" aria-live="polite">Завантажую облікові записи…</p>
@@ -36,6 +36,16 @@
     </section>
     <section class="admin-card admin-audit" aria-labelledby="audit-title"><div class="admin-card-heading"><div><h2 id="audit-title">Історія змін</h2><p>Останні дії адміністраторів з обліковими записами.</p></div></div><div id="audit-list" class="audit-list"><p class="admin-message">Завантажую журнал…</p></div></section>
   </div></main>
-  <script src="js/api-client.js?v=2"></script><script src="js/admin.js?v=1"></script>
+  <dialog id="password-dialog" class="password-dialog" aria-labelledby="password-dialog-title">
+    <form id="password-reset-form">
+      <h2 id="password-dialog-title">Задати новий пароль</h2>
+      <p id="password-dialog-account" class="password-dialog-account"></p>
+      <label>Новий пароль<input id="password-reset-value" type="password" autocomplete="new-password" minlength="8" maxlength="1024" required></label>
+      <label>Повторіть пароль<input id="password-reset-confirm" type="password" autocomplete="new-password" minlength="8" maxlength="1024" required></label>
+      <p id="password-dialog-message" class="admin-message" role="status" aria-live="polite"></p>
+      <div class="password-dialog-actions"><button id="password-dialog-cancel" class="button button-ghost" type="button">Скасувати</button><button class="button button-primary" type="submit">Задати пароль</button></div>
+    </form>
+  </dialog>
+  <script src="js/api-client.js?v=2"></script><script src="js/admin.js?v=3"></script>
 </body>
 </html>
