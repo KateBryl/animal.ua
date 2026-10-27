@@ -8,7 +8,10 @@ const { Pool } = require('pg');
 const ROOT = __dirname;
 const envFile = path.join(ROOT, '.env');
 if (fs.existsSync(envFile)) {
-  for (const line of fs.readFileSync(envFile, 'utf8').split(/\r?\n/)) {
+  let localEnv = '';
+  try { localEnv = fs.readFileSync(envFile, 'utf8'); }
+  catch (error) { if (error.code !== 'EACCES') throw error; }
+  for (const line of localEnv.split(/\r?\n/)) {
     const match = line.match(/^\s*([A-Za-z_][A-Za-z0-9_]*)\s*=\s*(.*?)\s*$/);
     if (match && !Object.hasOwn(process.env, match[1])) process.env[match[1]] = match[2].replace(/^(['"])(.*)\1$/, '$2');
   }
