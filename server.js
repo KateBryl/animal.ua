@@ -16,7 +16,7 @@ if (fs.existsSync(envFile)) {
 
 const PORT = Number(process.env.PORT || 3000);
 const DATABASE_URL = process.env.DATABASE_URL || '';
-const AUTH_SECRET = process.env.AUTH_SECRET || '';
+const AUTH_SECRET = process.env.AUTH_SECRET || process.env.FILE_SIGNING_KEY || '';
 const pool = DATABASE_URL ? new Pool({ connectionString: DATABASE_URL, max: 10 }) : null;
 const uploadsDir = path.join(ROOT, 'uploads');
 const MIME = { '.html': 'text/html; charset=utf-8', '.css': 'text/css; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.json': 'application/json; charset=utf-8', '.png': 'image/png', '.jpg': 'image/jpeg', '.jpeg': 'image/jpeg', '.svg': 'image/svg+xml', '.webp': 'image/webp', '.ico': 'image/x-icon' };
@@ -38,7 +38,7 @@ async function readJson(req, maxBytes = 8 * 1024 * 1024) {
 const tokenHash = (token) => crypto.createHash('sha256').update(token).digest('hex');
 const makeToken = () => crypto.randomBytes(32).toString('base64url');
 const emailOf = (value) => String(value || '').trim().toLowerCase().slice(0, 254);
-const publicUser = (row) => ({ id: row.id, email: row.email, user_metadata: { full_name: row.full_name || '', role: row.role || 'owner' } });
+const publicUser = (row) => ({ id: row.id, email: row.email, user_metadata: { full_name: row.full_name || '', role: row.role || 'owner', is_admin: Boolean(row.is_admin) } });
 const authResult = (user, access, refresh) => ({ access_token: access, refresh_token: refresh, token_type: 'bearer', expires_in: 3600, user });
 
 async function createSession(userId) {
@@ -50,9 +50,78 @@ async function createSession(userId) {
 async function currentUser(req) {
   const access = (req.headers.authorization || '').replace(/^Bearer\s+/i, '');
   if (!access) throw Object.assign(new Error('Sign in required'), { status: 401 });
-  const result = await pool.query(`SELECT u.* FROM app_sessions s JOIN profiles u ON u.id=s.user_id WHERE s.access_hash=$1 AND s.access_expires_at>now() AND s.expires_at>now()`, [tokenHash(access)]);
+  const result = await pool.query(`SELECT u.* FROM app_sessions s JOIN profiles u ON u.id=s.user_id WHERE s.access_hash=$1 AND s.access_expires_at>now() AND s.expires_at>now() AND u.is_active=true`, [tokenHash(access)]);
   if (!result.rowCount) throw Object.assign(new Error('Invalid or expired session'), { status: 401 });
   return result.rows[0];
+}
+
+function requireAdmin(user) {
+  if (!user.is_admin) throw Object.assign(new Error('Admin access required'), { status: 403 });
+}
+
+async function listAccounts(res, url) {
+  const query = String(url.searchParams.get('q') || '').trim().slice(0, 120);
+  const limit = Math.min(100, Math.max(1, Number.parseInt(url.searchParams.get('limit') || '25', 10) || 25));
+  const offset = Math.max(0, Number.parseInt(url.searchParams.get('offset') || '0', 10) || 0);
+  const filter = query ? `%${query}%` : null;
+  const [count, rows] = await Promise.all([
+    pool.query(`SELECT count(*)::int AS total,
+      (count(*) FILTER (WHERE is_active))::int AS active,
+      (count(*) FILTER (WHERE role='vet'))::int AS vets
+      FROM profiles WHERE $1::text IS NULL OR email ILIKE $1 OR full_name ILIKE $1`, [filter]),
+    pool.query(`SELECT p.id,p.email,p.full_name,p.role,p.is_admin,p.is_active,p.created_at,
+      (SELECT count(*)::int FROM pets pet WHERE pet.owner_id=p.id) AS pets_count
+      FROM profiles p WHERE $1::text IS NULL OR p.email ILIKE $1 OR p.full_name ILIKE $1
+      ORDER BY p.created_at DESC,p.id LIMIT $2 OFFSET $3`, [filter, limit, offset])
+  ]);
+  return json(res, 200, { accounts: rows.rows, total: count.rows[0].total, summary:{total:count.rows[0].total,active:count.rows[0].active,vets:count.rows[0].vets}, limit, offset });
+}
+
+async function updateAccount(req, res, actor, targetId) {
+  const body = await readJson(req, 16 * 1024);
+  if (!body || typeof body !== 'object' || Array.isArray(body)) throw Object.assign(new Error('Invalid request body'), { status:400 });
+  if (Object.keys(body).some(key => !['role','is_active'].includes(key))) throw Object.assign(new Error('Only role and account status can be changed'), { status:400 });
+  if (!Object.hasOwn(body, 'role') && !Object.hasOwn(body, 'is_active')) throw Object.assign(new Error('No account changes provided'), { status:400 });
+  if (Object.hasOwn(body, 'role') && !['owner','vet'].includes(body.role)) throw Object.assign(new Error('Role must be owner or vet'), { status:400 });
+  if (Object.hasOwn(body, 'is_active') && typeof body.is_active !== 'boolean') throw Object.assign(new Error('is_active must be a boolean'), { status:400 });
+  if (targetId === actor.id && body.is_active === false) throw Object.assign(new Error('You cannot deactivate your own account'), { status:409 });
+  if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(targetId)) throw Object.assign(new Error('Invalid account id'), { status:400 });
+
+  const client = await pool.connect();
+  try {
+    await client.query('BEGIN');
+    const found = await client.query('SELECT id,email,full_name,role,is_admin,is_active,created_at FROM profiles WHERE id=$1 FOR UPDATE', [targetId]);
+    if (!found.rowCount) { await client.query('ROLLBACK'); return json(res,404,{error:'Account not found'}); }
+    const before = found.rows[0];
+    if (before.is_admin) throw Object.assign(new Error('Admin accounts must be managed directly in the database'), { status:409 });
+    const nextRole = Object.hasOwn(body,'role') ? body.role : before.role;
+    const nextActive = Object.hasOwn(body,'is_active') ? body.is_active : before.is_active;
+    const changes = {};
+    if (nextRole !== before.role) changes.role = { from:before.role, to:nextRole };
+    if (nextActive !== before.is_active) changes.is_active = { from:before.is_active, to:nextActive };
+    if (!Object.keys(changes).length) { await client.query('COMMIT'); return json(res,200,{account:before,changed:false}); }
+
+    const updated = await client.query('UPDATE profiles SET role=$2,is_active=$3,updated_at=now() WHERE id=$1 RETURNING id,email,full_name,role,is_admin,is_active,created_at', [targetId,nextRole,nextActive]);
+    if (!nextActive) await client.query('DELETE FROM app_sessions WHERE user_id=$1', [targetId]);
+    await client.query('INSERT INTO admin_audit_log(actor_id,target_user_id,action,details) VALUES($1,$2,$3,$4::jsonb)', [actor.id,targetId,'account.updated',JSON.stringify(changes)]);
+    await client.query('COMMIT');
+    return json(res,200,{account:updated.rows[0],changed:true});
+  } catch (error) {
+    await client.query('ROLLBACK');
+    throw error;
+  } finally { client.release(); }
+}
+
+async function listAdminAudit(res, url) {
+  const limit = Math.min(100, Math.max(1, Number.parseInt(url.searchParams.get('limit') || '50', 10) || 50));
+  const offset = Math.max(0, Number.parseInt(url.searchParams.get('offset') || '0', 10) || 0);
+  const result = await pool.query(`SELECT a.id,a.action,a.details,a.created_at,
+      actor.email AS actor_email,target.email AS target_email
+    FROM admin_audit_log a
+    LEFT JOIN profiles actor ON actor.id=a.actor_id
+    LEFT JOIN profiles target ON target.id=a.target_user_id
+    ORDER BY a.created_at DESC,a.id DESC LIMIT $1 OFFSET $2`, [limit,offset]);
+  return json(res,200,{events:result.rows,limit,offset});
 }
 
 function petRecord(body, ownerId) {
@@ -112,11 +181,12 @@ async function handleApi(req, res, url) {
     if (!user) throw Object.assign(new Error('Неправильний email або пароль.'),{status:401});
     const hash=await scrypt(String(body.password||''),Buffer.from(user.password_salt,'hex'),64);
     if (!crypto.timingSafeEqual(hash,Buffer.from(user.password_hash,'hex'))) throw Object.assign(new Error('Неправильний email або пароль.'),{status:401});
+    if (!user.is_active) throw Object.assign(new Error('Обліковий запис деактивовано.'),{status:403});
     const session=await createSession(user.id); return json(res,200,authResult(publicUser(user),session.access,session.refresh));
   }
   if (req.method === 'POST' && route === '/api/auth/refresh') {
     const body=await readJson(req), refresh=String(body.refreshToken||'');
-    const result=await pool.query('SELECT u.* FROM app_sessions s JOIN profiles u ON u.id=s.user_id WHERE s.refresh_hash=$1 AND s.expires_at>now()',[tokenHash(refresh)]);
+    const result=await pool.query('SELECT u.* FROM app_sessions s JOIN profiles u ON u.id=s.user_id WHERE s.refresh_hash=$1 AND s.expires_at>now() AND u.is_active=true',[tokenHash(refresh)]);
     if(!result.rowCount) throw Object.assign(new Error('Invalid or expired refresh token'),{status:401});
     await pool.query('DELETE FROM app_sessions WHERE refresh_hash=$1',[tokenHash(refresh)]);
     const session=await createSession(result.rows[0].id); return json(res,200,authResult(publicUser(result.rows[0]),session.access,session.refresh));
@@ -124,7 +194,17 @@ async function handleApi(req, res, url) {
   if (route.startsWith('/api/')) {
     const user=await currentUser(req), id=user.id;
     if(req.method==='POST'&&route==='/api/auth/logout'){await pool.query('DELETE FROM app_sessions WHERE user_id=$1',[id]);return json(res,200,{ok:true});}
-    if(req.method==='GET'&&route==='/api/profile') return json(res,200,{id,full_name:user.full_name||'',phone:user.phone||'',role:user.role||'owner',avatar_path:user.avatar_path||null,emergency_contact:user.emergency_contact||'',schema_updated:true,email:user.email});
+    if(route.startsWith('/api/admin/')) {
+      requireAdmin(user);
+      if(req.method==='GET'&&route==='/api/admin/accounts') return listAccounts(res,url);
+      if(req.method==='PATCH') {
+        const accountMatch=route.match(/^\/api\/admin\/accounts\/([0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12})$/i);
+        if(accountMatch) return updateAccount(req,res,user,accountMatch[1]);
+      }
+      if(req.method==='GET'&&route==='/api/admin/audit') return listAdminAudit(res,url);
+      return json(res,404,{error:'Admin API route not found'});
+    }
+    if(req.method==='GET'&&route==='/api/profile') return json(res,200,{id,full_name:user.full_name||'',phone:user.phone||'',role:user.role||'owner',is_admin:Boolean(user.is_admin),avatar_path:user.avatar_path||null,emergency_contact:user.emergency_contact||'',schema_updated:true,email:user.email});
     if(req.method==='PATCH'&&route==='/api/profile'){
       const body=await readJson(req);const result=await pool.query('UPDATE profiles SET full_name=$2,phone=$3,role=$4,avatar_path=$5,emergency_contact=$6,updated_at=now() WHERE id=$1 RETURNING *',[id,String(body.full_name||'').slice(0,160),String(body.phone||'').slice(0,40),body.role==='vet'?'vet':'owner',body.avatar_path||null,String(body.emergency_contact||'').slice(0,240)]);
       return json(res,200,{...result.rows[0],schema_updated:true,email:user.email});
@@ -175,7 +255,7 @@ async function main(){
   }
   await fs.promises.mkdir(uploadsDir,{recursive:true,mode:0o700});
   const server=http.createServer(async(req,res)=>{
-    try{const url=new URL(req.url,`http://${req.headers.host||'localhost'}`);if(url.pathname.startsWith('/api/'))return await handleApi(req,res,url);if(req.method!=='GET'&&req.method!=='HEAD')return json(res,405,{error:'Method not allowed'});let pathname=decodeURIComponent(url.pathname);if(pathname==='/')pathname='/index.html';if(pathname.split('/').some(x=>x.startsWith('.'))||pathname==='/server.js')return json(res,404,{error:'Not found'});const file=path.resolve(ROOT,`.${pathname}`);if(!file.startsWith(ROOT+path.sep))return json(res,403,{error:'Forbidden'});const stat=await fs.promises.stat(file);if(!stat.isFile())return json(res,404,{error:'Not found'});res.writeHead(200,{'content-type':MIME[path.extname(file).toLowerCase()]||'application/octet-stream','content-length':stat.size});if(req.method==='HEAD')return res.end();fs.createReadStream(file).pipe(res);}catch(e){if(req.url?.startsWith('/api/'))console.error(`[api] ${req.method} ${req.url.split('?')[0]}: ${e.message}`);json(res,e.status||500,{error:e.message||'Internal server error'});}
+    try{const url=new URL(req.url,`http://${req.headers.host||'localhost'}`);if(url.pathname.startsWith('/api/'))return await handleApi(req,res,url);if(req.method!=='GET'&&req.method!=='HEAD')return json(res,405,{error:'Method not allowed'});let pathname=decodeURIComponent(url.pathname);if(pathname==='/')pathname='/index.html';if(pathname==='/admin'||pathname==='/admin/')pathname='/admin.html';if(pathname.split('/').some(x=>x.startsWith('.'))||pathname==='/server.js')return json(res,404,{error:'Not found'});const file=path.resolve(ROOT,`.${pathname}`);if(!file.startsWith(ROOT+path.sep))return json(res,403,{error:'Forbidden'});const stat=await fs.promises.stat(file);if(!stat.isFile())return json(res,404,{error:'Not found'});res.writeHead(200,{'content-type':MIME[path.extname(file).toLowerCase()]||'application/octet-stream','content-length':stat.size});if(req.method==='HEAD')return res.end();fs.createReadStream(file).pipe(res);}catch(e){if(req.url?.startsWith('/api/'))console.error(`[api] ${req.method} ${req.url.split('?')[0]}: ${e.message}`);json(res,e.status||500,{error:e.message||'Internal server error'});}
   });
   server.listen(PORT,'0.0.0.0',()=>console.log(`Animal.ua connected to PostgreSQL; listening on http://localhost:${PORT}`));
 }

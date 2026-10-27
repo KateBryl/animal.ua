@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="uk">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Керування обліковими записами — Animal.ua</title>
+  <link rel="icon" href="img/Animal.ua.png">
+  <link rel="stylesheet" href="css/main.min.css?v=3">
+  <link rel="stylesheet" href="css/admin.css?v=1">
+</head>
+<body>
+  <header class="site-header"><div class="container admin-nav">
+    <a class="brand" href="index.html"><img src="img/Animal.png" alt="Animal.ua"></a>
+    <nav class="admin-nav-actions" aria-label="Навігація адміністратора">
+      <a class="button button-ghost" href="profile.html">Мій профіль</a>
+      <button class="button button-primary" id="logout" type="button">Вийти</button>
+    </nav>
+  </div></header>
+  <main class="admin-page"><div class="container">
+    <div class="admin-heading">
+      <div><p class="eyebrow">Адміністрування</p><h1>Облікові записи</h1><p>Переглядайте користувачів, змінюйте тип облікового запису та керуйте доступом.</p></div>
+      <a class="admin-back" href="profile.html">← До профілю</a>
+    </div>
+    <section class="admin-stats" aria-label="Зведення облікових записів">
+      <article><span>Усього</span><strong id="stat-total">—</strong></article>
+      <article><span>Активні</span><strong id="stat-active">—</strong></article>
+      <article><span>Ветеринари</span><strong id="stat-vets">—</strong></article>
+    </section>
+    <section class="admin-card" aria-labelledby="accounts-title">
+      <div class="admin-card-heading"><div><h2 id="accounts-title">Користувачі</h2><p>Зміни ролі зберігаються одразу. Деактивація відкликає всі активні сесії.</p></div>
+        <label class="admin-search">Пошук<input id="account-search" type="search" placeholder="Ім’я або email" autocomplete="off"></label>
+      </div>
+      <p id="admin-message" class="admin-message" role="status" aria-live="polite">Завантажую облікові записи…</p>
+      <div class="admin-table-wrap"><table class="admin-table"><thead><tr><th>Користувач</th><th>Тип</th><th>Статус</th><th>Тварини</th><th>Створено</th><th><span class="sr-only">Дії</span></th></tr></thead><tbody id="accounts-body"></tbody></table></div>
+      <div class="admin-pagination"><span id="page-label"></span><div><button id="previous-page" class="button button-ghost" type="button" disabled>Назад</button><button id="next-page" class="button button-ghost" type="button" disabled>Далі</button></div></div>
+    </section>
+    <section class="admin-card admin-audit" aria-labelledby="audit-title"><div class="admin-card-heading"><div><h2 id="audit-title">Історія змін</h2><p>Останні дії адміністраторів з обліковими записами.</p></div></div><div id="audit-list" class="audit-list"><p class="admin-message">Завантажую журнал…</p></div></section>
+  </div></main>
+  <script src="js/api-client.js?v=2"></script><script src="js/admin.js?v=1"></script>
+</body>
+</html>
